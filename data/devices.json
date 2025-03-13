@@ -1,0 +1,16 @@
+[
+    {
+        "name": "AC2A2339000707047",
+        "address": "C8:A0:09:CD:DA:61",
+        "manufacturer": "bluetti",
+        "rssi": -28,
+        "timestamp": "2025-03-12T17:54:46.993073"
+    },
+    {
+        "name": "Shelly2PMG3-34CDB0770E28",
+        "address": "34:CD:B0:77:0E:2A",
+        "manufacturer": "shelly",
+        "rssi": -34,
+        "timestamp": "2025-03-12T17:54:42.373806"
+    }
+]
