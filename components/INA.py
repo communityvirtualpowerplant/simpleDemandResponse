@@ -1,11 +1,13 @@
 # INA219 and INA260 sensors meaure DC power
 # One is more appropriate for PV and the other is for USB
+# sudo pip install adafruit-circuit-python-ina219
 
 import asyncio
 import board
 import busio
 import adafruit_ina260
 import adafruit_ina219
+
 class INA():
 	def __init__(self, name):
 		self.name = name

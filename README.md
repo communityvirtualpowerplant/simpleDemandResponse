@@ -1,18 +1,45 @@
 # simpleDemandResponse
-A class for basic demand response functions for DIY home implementations and educational purposes.
 
-## Hardware Setup
+A simple MQTT based implementation of a demand response system composed of behind-the-meter (BTM) batterys and smart switches.
+
+## Demand Response (DR) and Virtual Power Plants (VPP)
+
+### DR Event Actions
+
+#### Automated Curtailment
+
+#### Automated Replacement
+
+#### Automated Shifting
+
+Automated shifting is not currenty available with this project, but it can be easily extended.
+
+#### Manual Performance
+
+### Enrollment
+
+## Hardware
 
 This system relies on a power station, auto transfer switch, smart outlets or smart relays, and power measuring. If a solar panel is connected to the power station, an addition DC power meter is also necessary.
 
-## Functions
+### Battery/ Power Station
 
-### DR Responses
-Curtailment
+Bluetti power stations
 
-Replacement
+### Smart Relays
 
-Shifting
+Shelly
+
+### Additional Sensors
+
+INA219
+
+## Software
+
+### Installation
+
+### Functions
+
 
 ### Optimization
 Charging
@@ -25,8 +52,4 @@ Weather
 
 Baselines
 
-### Manual Participation
-
 ### Communication and Interfaces
-
-### Enrollment

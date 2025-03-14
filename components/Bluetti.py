@@ -17,9 +17,21 @@ from bluetti_mqtt.core import (
 )
 
 class Bluetti():
-    def __init__(self, address):
+    def __init__(self, address: str, name: str):
         self.address = address
+        self.name = name
+        self.manufacturer = 'bluetti'
         self.data = {'total_battery_percent':0,'ac_output_power':0,'ac_input_power':0,'dc_output_power':0,'dc_input_power':0}
+        self.charge = False
+        self.BLUETTI_GATT_SERVICE_UUID = "0000ff00-0000-1000-8000-00805f9b34fb" #not in use
+    
+    # def manageCharge(self, charge: self.charge, percent: self.data['total_battery_percent']):
+    # # update charge state flag
+    #     # if battery is <= 20 start charging until full
+    #     if percent <= 20:
+    #         chargeState = 1
+    #     elif battery.percentage == 100:
+    #         chargeState = 0
 
     async def log_command(self, client: BluetoothClient, device: BluettiDevice, command: DeviceCommand):
         response_future = await client.perform(command)

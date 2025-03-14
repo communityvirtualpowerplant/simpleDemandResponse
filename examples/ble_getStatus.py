@@ -1,11 +1,16 @@
+# reads the devices.json file and retrieves the status of all devices at the specified location
+# run with "python -m utilities.ble_getStatus.py" + location from parent directory
+
 import sys
 import asyncio
 import json
 import signal
 import logging
+import time
+from typing import cast
 from typing import Any, Dict, Optional, Tuple, List
-from deviceClasses.Shelly import ShellyDevice
-from deviceClasses.Bluetti import Bluetti
+from components.Shelly import ShellyDevice
+from components.Bluetti import Bluetti
 from bluetti_mqtt.bluetooth import (
     check_addresses, scan_devices, BluetoothClient, ModbusError,
     ParseError, BadConnectionError
@@ -14,24 +19,18 @@ from bluetti_mqtt.core import (
     BluettiDevice, ReadHoldingRegisters, DeviceCommand
 )
 
-# ============================
-# Shelly Configuration Constants
-# ============================
-SHELLY_GATT_SERVICE_UUID = "5f6d4f53-5f52-5043-5f53-56435f49445f"
-RPC_CHAR_DATA_UUID = "5f6d4f53-5f52-5043-5f64-6174615f5f5f"
-RPC_CHAR_TX_CTL_UUID = "5f6d4f53-5f52-5043-5f74-785f63746c5f"
-RPC_CHAR_RX_CTL_UUID = "5f6d4f53-5f52-5043-5f72-785f63746c5f"
-ALLTERCO_MFID = 0x0BA9  # Manufacturer ID for Shelly devices
-
-# not in use
-BLUETTI_GATT_SERVICE_UUID = "0000ff00-0000-1000-8000-00805f9b34fb"
-
 printInfo = True
 printDebug = True
 printError = True
 #logging.basicConfig(level=logging.DEBUG)
 
 fileName = 'data/devices.json'
+
+#if an arg has been passed
+if len(sys.argv) > 0:
+    location = sys.argv[1]
+else:
+    location = ''
 
 # ============================
 # Logging Helper
@@ -63,7 +62,7 @@ def handle_signal(signal_num: int, frame: Any) -> None:
     log_info(f"Received signal {signal_num}, shutting down gracefully...")
     sys.exit(0)
 
-async def main() -> None:
+async def main(location) -> None:
     # Read data from a JSON file
     try:
         with open(fileName, "r") as json_file:
@@ -76,14 +75,53 @@ async def main() -> None:
         log_error("No devices found. Exiting")
         sys.exit(0)
 
+    # Connect to all target devices concurrently
+    # tasks = [connect_to_device(address) for address in target_addresses]
+    # await asyncio.gather(*tasks)
+    #await asyncio.gather(*[c.run() for c in self.clients.values()])
+
+    filteredEntries = []
     for entry in devices:
+        if entry['location'] == location:
+            filteredEntries.append(entry)
+    tasks = [statusUpdate(e) for e in filteredEntries]
+    await asyncio.gather(*tasks)
+
+async def statusUpdate(entry):
+
+    while True:
+        print("")
         if entry['manufacturer'] == 'shelly':
-            selected_device_info = entry
 
-            shelly = ShellyDevice(entry["address"], 0, 1)
+            entry['device'] = ShellyDevice(entry["address"], entry["name"])
+            try:
+                result = await getStatusShelly(entry['device'])
 
-        else:
-            bluetti = Bluetti(entry["address"])
+                if result:
+                    print(f"RPC Method executed successfully. Result:")
+                    print(json.dumps(result))
+
+                else:
+                    print(f"RPC Method executed successfully. No data returned.")
+            except Exception as e:
+                log_error(f"Error getting Shelly status: {e}")
+
+        elif entry['manufacturer'] == 'bluetti':
+            entry['device'] = Bluetti(entry["address"],entry["name"])
+            try:
+                result = await getStatusBluetti(entry['device'])
+            except Exception as e:
+                log_error(f"Error getting Bluetti status: {e}")
+
+            if result:
+                print(f"Method executed successfully. Result:")
+                print(result)
+
+
+            else:
+                print(f"Method executed successfully. No data returned.")
+    await asyncio.sleep(20)
+
 
     # result = await execute_toggle(device)
 
@@ -92,27 +130,6 @@ async def main() -> None:
     #     print_with_jq(result.get("result", {}))
     # else:
     #     print(f"RPC Method executed successfully. No data returned.")
-
-    result = await getStatusShelly(shelly)
-
-    if result:
-        print(f"RPC Method executed successfully. Result:")
-        #print(json.dumps(result.get("result", {})))
-
-        data = result.get("result", {})
-        #print(json.dumps(data))
-        try:
-            print(f"Channel 0: {data['input:0']}")
-            print(f"Channel 1: {data['input:1']}")
-            print(f"Switch 0: {data['switch:0']}")
-            print(f"Switch 1: {data['switch:1']}")
-        except:
-            print('no data???')
-
-    else:
-        print(f"RPC Method executed successfully. No data returned.")
-
-    result = await getStatusBluetti(bluetti)
 
 # get status
 async def getStatusShelly(device: ShellyDevice):
@@ -125,75 +142,49 @@ async def getStatusShelly(device: ShellyDevice):
         result = await device.call_rpc(rpc_method, params=params)
         if result:
             print(f"RPC Method '{rpc_method}' executed successfully. Result:")
+            result = device.parse_response(result)
         else:
             print(f"RPC Method '{rpc_method}' executed successfully. No data returned.")
+        return result
 
     except Exception as e:
         print(f"Unexpected error during command execution: {e}")
 
-    return result
-        
-# async def getStatusBluetti(device: BluettiDevice):
+    #return
 
-#     method='get_status'
-
-#     try:
-#         print(f'Connecting to {device.address}')
-#         client = BluetoothClient(device.address)
-#         asyncio.get_running_loop().create_task(client.run())
-
-#         # Wait for device connection
-#         while not client.is_ready:
-#             print('Waiting for connection...')
-#             await asyncio.sleep(1)
-#             continue
-
-#         # Poll device
-#         #while True:
-#         for command in device.log_command:
-#             commandResponse = await log_command(client, device, command)
-#             for k,v in commandResponse.items():
-#                 print(k + ": " + str(v))
-#                 myData[k]=v
-    
-#     except Exception as e:
-#         print(f"Unexpected error during command execution: {e}")
-
-#     #print(myData)
-#     return result
-
-
-async def getStatusBluetti(device: BluettiDevice):
-
-    address = device.address
-
+async def getStatusBluetti(myDevice: str):
+    address = myDevice.address
     myData={
     }
 
-    devices = await check_addresses({address})
-    if len(devices) == 0:
-        sys.exit('Could not find the given device to connect to')
-    device = devices[0]
-
-    print(f'Connecting to {device.address}')
-    client = BluetoothClient(device.address)
-    asyncio.get_running_loop().create_task(client.run())
-
-    # Wait for device connection
-    while not client.is_ready:
-        print('Waiting for connection...')
-        await asyncio.sleep(1)
-        continue
-
-    # Poll device
-    #while True:
-    for command in device.logging_commands:
-        commandResponse = await device.logging_commands(client, device, command)
-        for k,v in commandResponse.items():
-            print(k + ": " + str(v))
-            myData[k]=v
+    try:
+        devices = await check_addresses({address})
+        #if len(devices) == 0:
+          #  sys.exit('Could not find the given device to connect to')
+        device = devices[0]
     
-    return myData
+        print(f'Connecting to {device.address}')
+        client = BluetoothClient(device.address)
+        #await client.run()
+        asyncio.get_running_loop().create_task(await client.run())
+
+        # Wait for device connection
+        while not client.is_ready:
+            print('Waiting for connection...')
+            await asyncio.sleep(1)
+            continue
+
+        # Poll device
+        for command in device.logging_commands:
+            commandResponse = await log_command(client, device, command)
+            for k,v in commandResponse.items():
+                print(k + ": " + str(v))
+                myData[k]=v
+
+        client.client.disconnect()
+
+    except Exception as e:
+        print(f"Unexpected error during command execution: {e}")
 
 
 async def log_command(client: BluetoothClient, device: BluettiDevice, command: DeviceCommand):
@@ -209,7 +200,6 @@ async def log_command(client: BluetoothClient, device: BluettiDevice, command: D
         print(f'Got an error running command {command}: {err}')
         #log_invalid(log_file, err, command)
 
-
 if __name__ == "__main__":
     # Suppress FutureWarnings
     import warnings
@@ -221,7 +211,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, handle_signal)
 
     try:
-        asyncio.run(main())
+        asyncio.run(main(location))
     except KeyboardInterrupt:
         log_info("Script interrupted by user via KeyboardInterrupt.")
     except Exception as e:

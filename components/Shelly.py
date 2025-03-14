@@ -18,20 +18,22 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
 
-############### POSITIONS ######################
-# Numbers indicate position of relay and sensor in system
+############### Assignment ######################
+# Numbers indicate position in system
 #
-#     +--2--[BAT]--4--+
-# ----|               [TRANSFER SWITCH]--3-->
-#     +-------1-------+
+#      +--1--[BAT]--2--+
+# --4--|               [TRANSFER SWITCH]--3-->
+#      +-------0-------+
 #
 ################################################
 
 class ShellyDevice:
     """Represents a Shelly BLE device and handles RPC communication."""
 
-    def __init__(self, address: str, channel: 0, position: 1):
+    def __init__(self, address: str, name: str):
         self.address = address
+        self.name = name
+        self.manufacturer = 'shelly'
         self.shelly_service = None
         self.data_char = None
         self.tx_ctl_char = None
@@ -41,8 +43,9 @@ class ShellyDevice:
         self.RPC_CHAR_TX_CTL_UUID = "5f6d4f53-5f52-5043-5f74-785f63746c5f"
         self.RPC_CHAR_RX_CTL_UUID = "5f6d4f53-5f52-5043-5f72-785f63746c5f"
         self.ALLTERCO_MFID = 0x0BA9  # Manufacturer ID for Shelly devices
-        self.relayChannel = channel
-        self.position = position
+        self.data = []
+        #self.relayChannel = channel
+        #self.position = position
 
     async def call_rpc(
         self,
@@ -251,6 +254,43 @@ class ShellyDevice:
         else:
             log_debug("RPC response does not contain 'result' or 'error'. Returning empty result.")
             return response  # Return the response as is, even if it's empty
+
+
+    def parse_response(self, response: Dict[str,Any]):
+        response = response.get("result", {})
+        switchKeys = [k for k in list(response.keys()) if 'switch' in k]
+        switches = []
+        for s in switchKeys:
+            switches.append(response[s])
+        return switches
+
+    def update_data(self, data:List[Dict[str,Any]]):
+        # for d in data:
+        self.data = data
+
+    async def run(self, freq=60):
+        # Poll device
+        while True:
+            
+            #id_input = 0
+            params = None
+            rpc_method='Shelly.GetStatus'
+    
+            try:
+                result = await device.call_rpc(rpc_method, params=params)
+                if result:
+                    print(f"RPC Method '{rpc_method}' executed successfully. Result:")
+                    result = device.parse_response(result)
+                else:
+                    print(f"RPC Method '{rpc_method}' executed successfully. No data returned.")
+
+                self.update_data(self.parse_response(response))
+            except Exception as e:
+                print(f"Unexpected error during command execution: {e}")
+
+            await asyncio.sleep(freq)
+
+    #     
 
 
 

@@ -18,7 +18,7 @@ from typing import Any, Dict, Optional, Tuple, List
 from datetime import datetime
 import json
 from deviceClasses.Shelly import ShellyDevice as Shelly
-
+import sys
 
 fileName = 'data/devices.json'
 
@@ -40,6 +40,13 @@ shellySTR = 'Shelly'
 # Bluetti Configuration Constants
 # ============================
 bluettiSTR = ['AC180','AC2']
+
+
+#if an arg has been passed
+if len(sys.argv) > 0:
+    location = sys.argv[1]
+else:
+    location = ''
 
 async def scan_devices(scan_duration: int, saved_devices: Dict):
     devices = saved_devices
@@ -76,7 +83,7 @@ async def scan_devices(scan_duration: int, saved_devices: Dict):
         # if advertisement_data.rssi < -80:
         #     return
 
-        #update rssi if device is already known
+        #update rssi and timestamp if device is already known
         if device.address in addresses:
             # loop through and update rssi data
             for entry in devices:
@@ -87,7 +94,9 @@ async def scan_devices(scan_duration: int, saved_devices: Dict):
                         "address": device.address,
                         "manufacturer":mf,
                         "rssi": advertisement_data.rssi,
-                        "timestamp":datetime.now().isoformat()
+                        "timestamp":datetime.now().isoformat(),
+                        "location": location,
+                        "assignment": device.assignment #indiciates position in system (by channel if applicable)
                     })
                     print(advertisement_data)
                     break
@@ -97,7 +106,9 @@ async def scan_devices(scan_duration: int, saved_devices: Dict):
                     "address": device.address,
                     "manufacturer":mf,
                     "rssi": advertisement_data.rssi,
-                    "timestamp":datetime.now().isoformat()
+                    "timestamp":datetime.now().isoformat(),
+                    "location": location,
+                    "assignment":'' #this is manually entered
                 })
             addresses.add(device.address)
 
