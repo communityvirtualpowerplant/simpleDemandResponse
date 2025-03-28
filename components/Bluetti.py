@@ -46,7 +46,7 @@ class Bluetti():
             print(f'Got an error running command {command}: {err}')
             #log_invalid(log_file, err, command)
 
-    async def run(self, freq=60):
+    async def run(self):
 
         devices = await check_addresses({self.mac})
         if len(devices) == 0:
@@ -55,8 +55,9 @@ class Bluetti():
 
         print(f'Connecting to {device.address}')
         client = BluetoothClient(device.address)
-        asyncio.get_running_loop().create_task(client.run())
-
+        #asyncio.get_running_loop().create_task(client.run())
+        client.run()
+        
         # Wait for device connection
         while not client.is_ready:
             print('Waiting for connection...')
@@ -65,10 +66,10 @@ class Bluetti():
         print('Bluetti device is ready')
 
         # Poll device
-        while True:
-            for command in device.logging_commands:
-                commandResponse = await self.log_command(client, device, command)
-                for k,v in commandResponse.items():
-                    #print(k + ": " + str(v))
-                    self.data[k]=v
-            await asyncio.sleep(freq)
+        #while True:
+        for command in device.logging_commands:
+            commandResponse = await self.log_command(client, device, command)
+            for k,v in commandResponse.items():
+                #print(k + ": " + str(v))
+                self.data[k]=v
+            #await asyncio.sleep(freq)

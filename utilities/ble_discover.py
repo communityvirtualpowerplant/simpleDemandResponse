@@ -17,7 +17,7 @@ import argparse
 from typing import Any, Dict, Optional, Tuple, List
 from datetime import datetime
 import json
-from deviceClasses.Shelly import ShellyDevice as Shelly
+from components.Shelly import ShellyDevice as Shelly
 import sys
 
 fileName = 'data/devices.json'
@@ -41,18 +41,17 @@ shellySTR = 'Shelly'
 # ============================
 bluettiSTR = ['AC180','AC2']
 
-
 #if an arg has been passed
-if len(sys.argv) > 0:
-    location = sys.argv[1]
+if len(sys.argv) > 1:
+    location = sys.argv[len(sys.argv) - 1]
 else:
     location = ''
 
 async def scan_devices(scan_duration: int, saved_devices: Dict):
-    devices = saved_devices
+    #devices = saved_devices
 
     # get unique addresses
-    addresses = set([entry.get("address") for entry in devices])
+    addresses = set([entry.get("address") for entry in saved_devices])
 
     log_debug(f"{len(addresses)} saved addresses found.")
 
@@ -75,33 +74,40 @@ async def scan_devices(scan_duration: int, saved_devices: Dict):
                     notFound = 0
                     continue
 
-        # if shelly or bluetti strings aren't find in devices return
+        # if shelly or bluetti strings aren't found in devices return
         if notFound == 1:
             return
         
         # Exclude devices with weak signal
         # if advertisement_data.rssi < -80:
         #     return
-
+        print(device)
+        
         #update rssi and timestamp if device is already known
         if device.address in addresses:
             # loop through and update rssi data
-            for entry in devices:
+            for entry in saved_devices:
                 if entry['address'] == device.address:
-                    devices.remove(entry)
-                    devices.append({
+                    saved_devices.remove(entry)
+
+                    try:
+                        assignment = device.assignment
+                    except:
+                        assignment = ''
+
+                    saved_devices.append({
                         "name": device.name,
                         "address": device.address,
                         "manufacturer":mf,
                         "rssi": advertisement_data.rssi,
                         "timestamp":datetime.now().isoformat(),
                         "location": location,
-                        "assignment": device.assignment #indiciates position in system (by channel if applicable)
+                        "assignment": assignment #indiciates position in system (by channel if applicable)
                     })
                     print(advertisement_data)
                     break
         else:
-            devices.append({
+            saved_devices.append({
                     "name": device.name,
                     "address": device.address,
                     "manufacturer":mf,
@@ -112,16 +118,13 @@ async def scan_devices(scan_duration: int, saved_devices: Dict):
                 })
             addresses.add(device.address)
 
-
-
-
     log_info(f"Scanning for BLE devices for {scan_duration} seconds...")
 
     async with BleakScanner(detection_callback=discovery_handler):
         await asyncio.sleep(scan_duration)
 
-    devices.sort(key=lambda d: d["rssi"], reverse=True)
-    return devices
+    saved_devices.sort(key=lambda d: d["rssi"], reverse=True)
+    return saved_devices
 
 async def main():
     scan_duaration = 5

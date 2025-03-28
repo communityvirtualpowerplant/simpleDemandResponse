@@ -18,6 +18,12 @@ from bluetti_mqtt.bluetooth import (
 from bluetti_mqtt.core import (
     BluettiDevice, ReadHoldingRegisters, DeviceCommand
 )
+from bleak import BleakClient, BleakError, BleakScanner
+from bleak.backends.device import BLEDevice
+from bleak.backends.scanner import AdvertisementData
+
+shellySTR = 'Shelly'
+bluettiSTR = ['AC180','AC2']
 
 printInfo = True
 printDebug = True
@@ -27,8 +33,8 @@ printError = True
 fileName = 'data/devices.json'
 
 #if an arg has been passed
-if len(sys.argv) > 0:
-    location = sys.argv[1]
+if len(sys.argv) > 1:
+    location = sys.argv[len(sys.argv)-1]
 else:
     location = ''
 
@@ -75,6 +81,7 @@ async def main(location) -> None:
         log_error("No devices found. Exiting")
         sys.exit(0)
 
+
     # Connect to all target devices concurrently
     # tasks = [connect_to_device(address) for address in target_addresses]
     # await asyncio.gather(*tasks)
@@ -89,38 +96,41 @@ async def main(location) -> None:
 
 async def statusUpdate(entry):
 
-    while True:
-        print("")
-        if entry['manufacturer'] == 'shelly':
+    #while True:
+    print("")
+    if entry['manufacturer'] == 'shelly':
 
-            entry['device'] = ShellyDevice(entry["address"], entry["name"])
-            try:
-                result = await getStatusShelly(entry['device'])
-
-                if result:
-                    print(f"RPC Method executed successfully. Result:")
-                    print(json.dumps(result))
-
-                else:
-                    print(f"RPC Method executed successfully. No data returned.")
-            except Exception as e:
-                log_error(f"Error getting Shelly status: {e}")
-
-        elif entry['manufacturer'] == 'bluetti':
-            entry['device'] = Bluetti(entry["address"],entry["name"])
-            try:
-                result = await getStatusBluetti(entry['device'])
-            except Exception as e:
-                log_error(f"Error getting Bluetti status: {e}")
+        entry['device'] = ShellyDevice(entry["address"], entry["name"])
+        try:
+            result = await getStatusShelly(entry['device'])
 
             if result:
-                print(f"Method executed successfully. Result:")
-                print(result)
-
+                print(f"RPC Method executed successfully. Result:")
+                print(json.dumps(result))
 
             else:
-                print(f"Method executed successfully. No data returned.")
-    await asyncio.sleep(20)
+                print(f"RPC Method executed successfully. No data returned.")
+        except Exception as e:
+            log_error(f"Error getting Shelly status: {e}")
+
+    elif entry['manufacturer'] == 'bluetti':
+        entry['device'] = Bluetti(entry["address"],entry["name"])
+        try:
+            result = await getStatusBluetti(entry['device'])
+        except Exception as e:
+            log_error(f"Error getting Bluetti status: {e}")
+
+        if result:
+            print(f"Method executed successfully. Result:")
+            print(result)
+
+        #   for k,v in commandResponse.items():
+        #     print(k + ": " + str(v))
+        #     myData[k]=v
+
+        else:
+            print(f"Method executed successfully. No data returned.")
+    #await asyncio.sleep(20)
 
 
     # result = await execute_toggle(device)
@@ -166,7 +176,7 @@ async def getStatusBluetti(myDevice: str):
         print(f'Connecting to {device.address}')
         client = BluetoothClient(device.address)
         #await client.run()
-        asyncio.get_running_loop().create_task(await client.run())
+        asyncio.get_running_loop().create_task(client.run())
 
         # Wait for device connection
         while not client.is_ready:
@@ -178,10 +188,11 @@ async def getStatusBluetti(myDevice: str):
         for command in device.logging_commands:
             commandResponse = await log_command(client, device, command)
             for k,v in commandResponse.items():
-                print(k + ": " + str(v))
                 myData[k]=v
+        #print(myData)
+        return myData
 
-        client.client.disconnect()
+        #client.client.disconnect()
 
     except Exception as e:
         print(f"Unexpected error during command execution: {e}")

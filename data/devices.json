@@ -5,8 +5,8 @@
         "manufacturer": "bluetti",
         "rssi": -28,
         "timestamp": "2025-03-12T17:54:46.993073",
-        "location":"home",
-        "assignment":"BAT"
+        "location": "home",
+        "assignment": "BAT"
     },
     {
         "name": "Shelly2PMG3-34CDB0770E28",
@@ -14,34 +14,37 @@
         "manufacturer": "shelly",
         "rssi": -34,
         "timestamp": "2025-03-12T17:54:42.373806",
-        "location":"home",
-        "assignment":[0,1]
-    },
-    {
-        "name": "ShellyPlus1PM-B8D61A8897D4",
-        "address": "B8:D6:1A:88:97:D6",
-        "manufacturer": "shelly",
-        "rssi": -34,
-        "timestamp": "2025-03-14T11:52:13.137983",
-        "location": "CASE",
-        "assignment":[0]
-    },
-    {
-        "name": "AC1802339003249506",
-        "address": "DC:8A:6F:FD:79:66",
-        "manufacturer": "bluetti",
-        "rssi": -36,
-        "timestamp": "2025-03-14T11:52:16.796295",
-        "location": "CASE",
-        "assignment":"BAT"
+        "location": "home",
+        "assignment": [
+            0,
+            1
+        ]
     },
     {
         "name": "Shelly1PMG3-5432045886C8",
         "address": "54:32:04:58:86:CA",
         "manufacturer": "shelly",
-        "rssi": -52,
-        "timestamp": "2025-03-14T11:52:14.420936",
+        "rssi": -46,
+        "timestamp": "2025-03-28T17:22:17.563040",
         "location": "CASE",
-        "assignment":[1]
+        "assignment": ""
+    },
+    {
+        "name": "AC1802339003249506",
+        "address": "DC:8A:6F:FD:79:66",
+        "manufacturer": "bluetti",
+        "rssi": -46,
+        "timestamp": "2025-03-28T17:22:17.901761",
+        "location": "CASE",
+        "assignment": ""
+    },
+    {
+        "name": "ShellyPlus1PM-B8D61A8897D4",
+        "address": "B8:D6:1A:88:97:D6",
+        "manufacturer": "shelly",
+        "rssi": -64,
+        "timestamp": "2025-03-28T17:22:17.530188",
+        "location": "CASE",
+        "assignment": ""
     }
 ]

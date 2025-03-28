@@ -1,6 +1,8 @@
 # simpleDemandResponse
 
-A simple MQTT based implementation of a demand response system composed of behind-the-meter (BTM) batterys and smart switches.
+Simple Demand Response is a 
+
+A simple MQTT based implementation of a demand response system composed of behind-the-meter (BTM) batteries and smart switches.
 
 There are 2 database files:
 * Participants

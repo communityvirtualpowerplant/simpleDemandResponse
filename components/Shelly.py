@@ -33,6 +33,7 @@ class ShellyDevice:
     def __init__(self, address: str, name: str):
         self.address = address
         self.name = name
+        #self.bledevice = ble
         self.manufacturer = 'shelly'
         self.shelly_service = None
         self.data_char = None
