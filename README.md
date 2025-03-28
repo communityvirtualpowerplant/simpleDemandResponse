@@ -2,6 +2,10 @@
 
 A simple MQTT based implementation of a demand response system composed of behind-the-meter (BTM) batterys and smart switches.
 
+There are 2 database files:
+* Participants
+* Data
+
 ## Demand Response (DR) and Virtual Power Plants (VPP)
 
 ### DR Event Actions
