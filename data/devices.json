@@ -1,24 +1,21 @@
 [
     {
-        "name": "AC2A2339000707047",
-        "address": "C8:A0:09:CD:DA:61",
-        "manufacturer": "bluetti",
-        "rssi": -28,
-        "timestamp": "2025-03-12T17:54:46.993073",
-        "location": "home",
-        "assignment": "BAT"
-    },
-    {
         "name": "Shelly2PMG3-34CDB0770E28",
         "address": "34:CD:B0:77:0E:2A",
         "manufacturer": "shelly",
-        "rssi": -34,
-        "timestamp": "2025-03-12T17:54:42.373806",
+        "rssi": -38,
+        "timestamp": "2025-03-31T11:11:46.894511",
         "location": "home",
-        "assignment": [
-            0,
-            1
-        ]
+        "assignment": ""
+    },
+    {
+        "name": "AC2A2339000707047",
+        "address": "C8:A0:09:CD:DA:61",
+        "manufacturer": "bluetti",
+        "rssi": -42,
+        "timestamp": "2025-03-31T11:11:46.903869",
+        "location": "home",
+        "assignment": ""
     },
     {
         "name": "Shelly1PMG3-5432045886C8",

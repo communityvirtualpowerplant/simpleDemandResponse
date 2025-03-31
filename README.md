@@ -1,6 +1,6 @@
 # simpleDemandResponse
 
-Simple Demand Response is a 
+Simple Demand Response is a framework for implementing basic DR functionality across a heterogenous aggregation through MQTT.
 
 A simple MQTT based implementation of a demand response system composed of behind-the-meter (BTM) batteries and smart switches.
 
