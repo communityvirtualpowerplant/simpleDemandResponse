@@ -8,6 +8,15 @@ There are 2 database files:
 * Participants
 * Data
 
+This project defines the requirements for Simple Demand Response
+
+Upcoming event info is distributed via MQTT
+* Easy enrollment
+
+Participant data is shared via an API
+* Security
+* User Choice
+
 ## Demand Response (DR) and Virtual Power Plants (VPP)
 
 ### DR Event Actions
