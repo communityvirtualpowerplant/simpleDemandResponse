@@ -68,3 +68,9 @@ Weather
 Baselines
 
 ### Communication and Interfaces
+
+
+
+### To do
+
+things to handle: events, alerts (fire, hurricane, etc.)
